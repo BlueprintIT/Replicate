@@ -1,0 +1,51 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Replicate", "Replicate\Replicate.csproj", "{68589F80-F3BB-45B1-923B-ED1650298907}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreAPI", "StoreAPI\StoreAPI.csproj", "{7B9024AF-E9F9-4B8D-9398-4816BFB5B94A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTPStore", "FTPStore\FTPStore.csproj", "{E410CE7A-EAFA-4B04-9C26-4AA37F163CAE}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileStore", "FileStore\FileStore.csproj", "{79C1F33E-EB2A-4C51-B97F-0A8929553FC9}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SyncInstaller", "Installer\Installer.vdproj", "{5EA80A21-F886-4999-9179-004D542AE938}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{68589F80-F3BB-45B1-923B-ED1650298907}.Debug.ActiveCfg = Debug|.NET
+		{68589F80-F3BB-45B1-923B-ED1650298907}.Debug.Build.0 = Debug|.NET
+		{68589F80-F3BB-45B1-923B-ED1650298907}.Release.ActiveCfg = Release|.NET
+		{68589F80-F3BB-45B1-923B-ED1650298907}.Release.Build.0 = Release|.NET
+		{7B9024AF-E9F9-4B8D-9398-4816BFB5B94A}.Debug.ActiveCfg = Debug|.NET
+		{7B9024AF-E9F9-4B8D-9398-4816BFB5B94A}.Debug.Build.0 = Debug|.NET
+		{7B9024AF-E9F9-4B8D-9398-4816BFB5B94A}.Release.ActiveCfg = Release|.NET
+		{7B9024AF-E9F9-4B8D-9398-4816BFB5B94A}.Release.Build.0 = Release|.NET
+		{E410CE7A-EAFA-4B04-9C26-4AA37F163CAE}.Debug.ActiveCfg = Debug|.NET
+		{E410CE7A-EAFA-4B04-9C26-4AA37F163CAE}.Debug.Build.0 = Debug|.NET
+		{E410CE7A-EAFA-4B04-9C26-4AA37F163CAE}.Release.ActiveCfg = Release|.NET
+		{E410CE7A-EAFA-4B04-9C26-4AA37F163CAE}.Release.Build.0 = Release|.NET
+		{79C1F33E-EB2A-4C51-B97F-0A8929553FC9}.Debug.ActiveCfg = Debug|.NET
+		{79C1F33E-EB2A-4C51-B97F-0A8929553FC9}.Debug.Build.0 = Debug|.NET
+		{79C1F33E-EB2A-4C51-B97F-0A8929553FC9}.Release.ActiveCfg = Release|.NET
+		{79C1F33E-EB2A-4C51-B97F-0A8929553FC9}.Release.Build.0 = Release|.NET
+		{5EA80A21-F886-4999-9179-004D542AE938}.Debug.ActiveCfg = Debug
+		{5EA80A21-F886-4999-9179-004D542AE938}.Release.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
