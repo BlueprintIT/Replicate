@@ -255,7 +255,7 @@ namespace BlueprintIT.Replicate
 				}
 				if ((record.Status==RecordStatus.TypeConflict)||(record.Status==RecordStatus.Conflict))
 				{
-					(new ConflictResolution(record)).ShowDialog();
+					(new ConflictResolution(records,record)).ShowDialog();
 				}
 			}
 		}

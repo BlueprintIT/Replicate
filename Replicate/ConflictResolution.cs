@@ -13,6 +13,7 @@ namespace BlueprintIT.Replicate
 	public class ConflictResolution : System.Windows.Forms.Form
 	{
 		private SyncRecord record;
+		private IDictionary records;
 		private System.Windows.Forms.GroupBox groupLocal;
 		private System.Windows.Forms.GroupBox groupRemote;
 		private System.Windows.Forms.Button btnLocalRename;
@@ -36,7 +37,7 @@ namespace BlueprintIT.Replicate
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public ConflictResolution(SyncRecord record)
+		public ConflictResolution(IDictionary records, SyncRecord record)
 		{
 			//
 			// Required for Windows Form Designer support
@@ -47,6 +48,8 @@ namespace BlueprintIT.Replicate
 			string remotetype;
 
 			this.record=record;
+			this.records=records;
+
 			lblLocalName.Text=record.LocalEntry.Uri.LocalPath;
 			lblRemoteName.Text=record.RemoteEntry.Uri.ToString();
 			lblLocalStatus.Text+=GetStatusDescription(record.LocalStatus);
@@ -131,6 +134,7 @@ namespace BlueprintIT.Replicate
 		private void InitializeComponent()
 		{
 			this.groupLocal = new System.Windows.Forms.GroupBox();
+			this.lblLocalStatus = new System.Windows.Forms.Label();
 			this.btnLocalView = new System.Windows.Forms.Button();
 			this.lblLocalDate = new System.Windows.Forms.Label();
 			this.lblLocalSize = new System.Windows.Forms.Label();
@@ -138,6 +142,7 @@ namespace BlueprintIT.Replicate
 			this.btnLocalDelete = new System.Windows.Forms.Button();
 			this.btnLocalRename = new System.Windows.Forms.Button();
 			this.groupRemote = new System.Windows.Forms.GroupBox();
+			this.lblRemoteStatus = new System.Windows.Forms.Label();
 			this.btnRemoteView = new System.Windows.Forms.Button();
 			this.lblRemoteDate = new System.Windows.Forms.Label();
 			this.lblRemoteSize = new System.Windows.Forms.Label();
@@ -146,8 +151,6 @@ namespace BlueprintIT.Replicate
 			this.btnRemoteRename = new System.Windows.Forms.Button();
 			this.lblDescription = new System.Windows.Forms.Label();
 			this.btnIgnore = new System.Windows.Forms.Button();
-			this.lblLocalStatus = new System.Windows.Forms.Label();
-			this.lblRemoteStatus = new System.Windows.Forms.Label();
 			this.groupLocal.SuspendLayout();
 			this.groupRemote.SuspendLayout();
 			this.SuspendLayout();
@@ -170,6 +173,17 @@ namespace BlueprintIT.Replicate
 			this.groupLocal.TabIndex = 0;
 			this.groupLocal.TabStop = false;
 			this.groupLocal.Text = "Local ";
+			// 
+			// lblLocalStatus
+			// 
+			this.lblLocalStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
+			this.lblLocalStatus.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.lblLocalStatus.Location = new System.Drawing.Point(16, 64);
+			this.lblLocalStatus.Name = "lblLocalStatus";
+			this.lblLocalStatus.Size = new System.Drawing.Size(208, 23);
+			this.lblLocalStatus.TabIndex = 6;
+			this.lblLocalStatus.Text = "Status: ";
 			// 
 			// btnLocalView
 			// 
@@ -224,6 +238,7 @@ namespace BlueprintIT.Replicate
 			this.btnLocalDelete.Name = "btnLocalDelete";
 			this.btnLocalDelete.TabIndex = 1;
 			this.btnLocalDelete.Text = "Delete...";
+			this.btnLocalDelete.Click += new System.EventHandler(this.btnLocalDelete_Click);
 			// 
 			// btnLocalRename
 			// 
@@ -233,6 +248,7 @@ namespace BlueprintIT.Replicate
 			this.btnLocalRename.Name = "btnLocalRename";
 			this.btnLocalRename.TabIndex = 0;
 			this.btnLocalRename.Text = "Rename...";
+			this.btnLocalRename.Click += new System.EventHandler(this.btnLocalRename_Click);
 			// 
 			// groupRemote
 			// 
@@ -252,6 +268,17 @@ namespace BlueprintIT.Replicate
 			this.groupRemote.TabIndex = 1;
 			this.groupRemote.TabStop = false;
 			this.groupRemote.Text = "Remote ";
+			// 
+			// lblRemoteStatus
+			// 
+			this.lblRemoteStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
+			this.lblRemoteStatus.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.lblRemoteStatus.Location = new System.Drawing.Point(16, 64);
+			this.lblRemoteStatus.Name = "lblRemoteStatus";
+			this.lblRemoteStatus.Size = new System.Drawing.Size(208, 23);
+			this.lblRemoteStatus.TabIndex = 7;
+			this.lblRemoteStatus.Text = "Status: ";
 			// 
 			// btnRemoteView
 			// 
@@ -306,6 +333,7 @@ namespace BlueprintIT.Replicate
 			this.btnRemoteDelete.Name = "btnRemoteDelete";
 			this.btnRemoteDelete.TabIndex = 1;
 			this.btnRemoteDelete.Text = "Delete...";
+			this.btnRemoteDelete.Click += new System.EventHandler(this.btnRemoteDelete_Click);
 			// 
 			// btnRemoteRename
 			// 
@@ -315,6 +343,7 @@ namespace BlueprintIT.Replicate
 			this.btnRemoteRename.Name = "btnRemoteRename";
 			this.btnRemoteRename.TabIndex = 0;
 			this.btnRemoteRename.Text = "Rename...";
+			this.btnRemoteRename.Click += new System.EventHandler(this.btnRemoteRename_Click);
 			// 
 			// lblDescription
 			// 
@@ -336,28 +365,6 @@ namespace BlueprintIT.Replicate
 			this.btnIgnore.TabIndex = 3;
 			this.btnIgnore.Text = "Ignore...";
 			this.btnIgnore.Click += new System.EventHandler(this.btnIgnore_Click);
-			// 
-			// lblLocalStatus
-			// 
-			this.lblLocalStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.lblLocalStatus.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.lblLocalStatus.Location = new System.Drawing.Point(16, 64);
-			this.lblLocalStatus.Name = "lblLocalStatus";
-			this.lblLocalStatus.Size = new System.Drawing.Size(208, 23);
-			this.lblLocalStatus.TabIndex = 6;
-			this.lblLocalStatus.Text = "Status: ";
-			// 
-			// lblRemoteStatus
-			// 
-			this.lblRemoteStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.lblRemoteStatus.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.lblRemoteStatus.Location = new System.Drawing.Point(16, 64);
-			this.lblRemoteStatus.Name = "lblRemoteStatus";
-			this.lblRemoteStatus.Size = new System.Drawing.Size(208, 23);
-			this.lblRemoteStatus.TabIndex = 7;
-			this.lblRemoteStatus.Text = "Status: ";
 			// 
 			// ConflictResolution
 			// 
@@ -387,6 +394,121 @@ namespace BlueprintIT.Replicate
 			{
 				record.Status=RecordStatus.Ignore;
 				this.DialogResult=DialogResult.OK;
+			}
+		}
+
+		private void btnLocalDelete_Click(object sender, System.EventArgs e)
+		{
+			if (MessageBox.Show("Are you sure you want to delete this file?","Delete file?",MessageBoxButtons.YesNo,MessageBoxIcon.Warning)==DialogResult.Yes)
+			{
+				record.Status=RecordStatus.Download;
+				this.DialogResult=DialogResult.OK;
+			}
+		}
+
+		private void btnRemoteDelete_Click(object sender, System.EventArgs e)
+		{
+			record.Status=RecordStatus.Upload;
+			this.DialogResult=DialogResult.OK;
+		}
+
+		private string FindNewName()
+		{
+			bool foundnewname = false;
+			string newname = null;
+			while (!foundnewname)
+			{
+				newname = Question.Ask("Rename file","Enter a new filename:",record.LocalEntry.Name);
+				if (newname==null)
+				{
+					return null;
+				}
+				foundnewname=true;
+				IFolder folder = record.LocalEntry.Folder;
+				if (folder[newname]!=null)
+				{
+					foundnewname=false;
+					MessageBox.Show("A file or folder with that name already exists locally.");
+				}
+				folder = record.RemoteEntry.Folder;
+				if (folder[newname]!=null)
+				{
+					foundnewname=false;
+					MessageBox.Show("A file or folder with that name already exists remotely.");
+				}
+			}
+			return newname;
+		}
+
+		private void btnLocalRename_Click(object sender, System.EventArgs e)
+		{
+			string newname = FindNewName();
+			if (newname!=null)
+			{
+				IEntry local = record.LocalEntry;
+				local.Name=newname;
+
+				if (record.RemoteEntry is IFile)
+				{
+					record.LocalEntry = local.Folder.GetFile(record.RemoteEntry.Name);
+				}
+				else
+				{
+					record.LocalEntry = local.Folder.GetFolder(record.RemoteEntry.Name);
+				}
+
+				// TODO need to put the new SyncRecord somewhere.
+				SyncRecord newrecord = new SyncRecord(newname);
+				newrecord.LocalEntry=local;
+				if (local is IFile)
+				{
+					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFile(newname);
+				}
+				else
+				{
+					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFolder(newname);
+				}
+				newrecord.Status=RecordStatus.Upload;
+				records[local.Path]=newrecord;
+
+				record.Status=RecordStatus.Download;
+				DialogResult=DialogResult.OK;
+			}
+		}
+
+		private void btnRemoteRename_Click(object sender, System.EventArgs e)
+		{
+			string newname = FindNewName();
+			if (newname!=null)
+			{
+				IEntry remote = record.RemoteEntry;
+				remote.Name=newname;
+
+				if (record.LocalEntry is IFile)
+				{
+					record.RemoteEntry = remote.Folder.GetFile(record.LocalEntry.Name);
+				}
+				else
+				{
+					record.RemoteEntry = remote.Folder.GetFolder(record.LocalEntry.Name);
+				}
+
+				// TODO need to put the new SyncRecord somewhere.
+				SyncRecord newrecord = new SyncRecord(newname);
+				newrecord.RemoteEntry=remote;
+				if (remote is IFile)
+				{
+					newrecord.LocalEntry=record.LocalEntry.Folder.GetFile(newname);
+				}
+				else
+				{
+					newrecord.LocalEntry=record.LocalEntry.Folder.GetFolder(newname);
+				}
+				newrecord.Status=RecordStatus.Download;
+				records[remote.Path]=newrecord;
+
+				record.Status=RecordStatus.Upload;
+				DialogResult=DialogResult.OK;
 			}
 		}
 	}
