@@ -84,6 +84,7 @@ namespace BlueprintIT.Replicate
 			this.listSettings.Name = "listSettings";
 			this.listSettings.Size = new System.Drawing.Size(232, 147);
 			this.listSettings.TabIndex = 0;
+			this.listSettings.DoubleClick += new System.EventHandler(this.listSettings_DoubleClick);
 			this.listSettings.SelectedIndexChanged += new System.EventHandler(this.listSettings_SelectedIndexChanged);
 			// 
 			// btnNew
@@ -163,6 +164,14 @@ namespace BlueprintIT.Replicate
 		private void listSettings_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
 			btnSelect.Enabled=(listSettings.SelectedIndex>=0);
+		}
+
+		private void listSettings_DoubleClick(object sender, System.EventArgs e)
+		{
+			if (listSettings.SelectedIndex>=0)
+			{
+				btnSelect_Click(sender,e);
+			}
 		}
 	}
 }

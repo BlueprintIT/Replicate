@@ -134,6 +134,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "SyncRecord.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "SyncScan.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "SyncSelector.cs"
                     SubType = "Form"
                     BuildAction = "Compile"

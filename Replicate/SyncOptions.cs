@@ -91,14 +91,14 @@ namespace BlueprintIT.Replicate
 		private void InitializeComponent()
 		{
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.txtLocal = new System.Windows.Forms.TextBox();
 			this.btnLocalBrowse = new System.Windows.Forms.Button();
-			this.label1 = new System.Windows.Forms.Label();
-			this.cmbProtocol = new System.Windows.Forms.ComboBox();
-			this.label2 = new System.Windows.Forms.Label();
-			this.txtRemote = new System.Windows.Forms.TextBox();
+			this.txtLocal = new System.Windows.Forms.TextBox();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.btnRemoteBrowse = new System.Windows.Forms.Button();
+			this.txtRemote = new System.Windows.Forms.TextBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.cmbProtocol = new System.Windows.Forms.ComboBox();
+			this.label1 = new System.Windows.Forms.Label();
 			this.btnSync = new System.Windows.Forms.Button();
 			this.btnCancel = new System.Windows.Forms.Button();
 			this.folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
@@ -118,6 +118,24 @@ namespace BlueprintIT.Replicate
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Local Files";
 			// 
+			// btnLocalBrowse
+			// 
+			this.btnLocalBrowse.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnLocalBrowse.Location = new System.Drawing.Point(296, 32);
+			this.btnLocalBrowse.Name = "btnLocalBrowse";
+			this.btnLocalBrowse.TabIndex = 1;
+			this.btnLocalBrowse.Text = "Browse...";
+			this.btnLocalBrowse.Click += new System.EventHandler(this.btnLocalBrowse_Click);
+			// 
+			// txtLocal
+			// 
+			this.txtLocal.Location = new System.Drawing.Point(16, 32);
+			this.txtLocal.Name = "txtLocal";
+			this.txtLocal.Size = new System.Drawing.Size(272, 20);
+			this.txtLocal.TabIndex = 0;
+			this.txtLocal.Text = "";
+			this.txtLocal.TextChanged += new System.EventHandler(this.txtLocal_TextChanged);
+			// 
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add(this.btnRemoteBrowse);
@@ -133,50 +151,14 @@ namespace BlueprintIT.Replicate
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Remote Files";
 			// 
-			// txtLocal
+			// btnRemoteBrowse
 			// 
-			this.txtLocal.Location = new System.Drawing.Point(16, 32);
-			this.txtLocal.Name = "txtLocal";
-			this.txtLocal.Size = new System.Drawing.Size(272, 20);
-			this.txtLocal.TabIndex = 0;
-			this.txtLocal.Text = "";
-			this.txtLocal.TextChanged += new System.EventHandler(this.txtLocal_TextChanged);
-			// 
-			// btnLocalBrowse
-			// 
-			this.btnLocalBrowse.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnLocalBrowse.Location = new System.Drawing.Point(296, 32);
-			this.btnLocalBrowse.Name = "btnLocalBrowse";
-			this.btnLocalBrowse.TabIndex = 1;
-			this.btnLocalBrowse.Text = "Browse...";
-			this.btnLocalBrowse.Click += new System.EventHandler(this.btnLocalBrowse_Click);
-			// 
-			// label1
-			// 
-			this.label1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label1.Location = new System.Drawing.Point(16, 32);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(80, 23);
-			this.label1.TabIndex = 0;
-			this.label1.Text = "Files are held on:";
-			// 
-			// cmbProtocol
-			// 
-			this.cmbProtocol.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.cmbProtocol.Location = new System.Drawing.Point(112, 32);
-			this.cmbProtocol.Name = "cmbProtocol";
-			this.cmbProtocol.Size = new System.Drawing.Size(176, 21);
-			this.cmbProtocol.TabIndex = 1;
-			this.cmbProtocol.SelectedIndexChanged += new System.EventHandler(this.cmbProtocol_SelectedIndexChanged);
-			// 
-			// label2
-			// 
-			this.label2.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.label2.Location = new System.Drawing.Point(16, 72);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(24, 24);
-			this.label2.TabIndex = 2;
-			this.label2.Text = "Url:";
+			this.btnRemoteBrowse.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnRemoteBrowse.Location = new System.Drawing.Point(296, 72);
+			this.btnRemoteBrowse.Name = "btnRemoteBrowse";
+			this.btnRemoteBrowse.TabIndex = 4;
+			this.btnRemoteBrowse.Text = "Browse...";
+			this.btnRemoteBrowse.Click += new System.EventHandler(this.btnRemoteBrowse_Click);
 			// 
 			// txtRemote
 			// 
@@ -187,14 +169,32 @@ namespace BlueprintIT.Replicate
 			this.txtRemote.Text = "";
 			this.txtRemote.TextChanged += new System.EventHandler(this.txtRemote_TextChanged);
 			// 
-			// btnRemoteBrowse
+			// label2
 			// 
-			this.btnRemoteBrowse.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnRemoteBrowse.Location = new System.Drawing.Point(296, 72);
-			this.btnRemoteBrowse.Name = "btnRemoteBrowse";
-			this.btnRemoteBrowse.TabIndex = 4;
-			this.btnRemoteBrowse.Text = "Browse...";
-			this.btnRemoteBrowse.Click += new System.EventHandler(this.btnRemoteBrowse_Click);
+			this.label2.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.label2.Location = new System.Drawing.Point(16, 72);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(24, 24);
+			this.label2.TabIndex = 2;
+			this.label2.Text = "Url:";
+			// 
+			// cmbProtocol
+			// 
+			this.cmbProtocol.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cmbProtocol.Location = new System.Drawing.Point(112, 32);
+			this.cmbProtocol.Name = "cmbProtocol";
+			this.cmbProtocol.Size = new System.Drawing.Size(176, 21);
+			this.cmbProtocol.TabIndex = 1;
+			this.cmbProtocol.SelectedIndexChanged += new System.EventHandler(this.cmbProtocol_SelectedIndexChanged);
+			// 
+			// label1
+			// 
+			this.label1.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.label1.Location = new System.Drawing.Point(16, 32);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(80, 23);
+			this.label1.TabIndex = 0;
+			this.label1.Text = "Files are held on:";
 			// 
 			// btnSync
 			// 
@@ -203,6 +203,7 @@ namespace BlueprintIT.Replicate
 			this.btnSync.Name = "btnSync";
 			this.btnSync.TabIndex = 2;
 			this.btnSync.Text = "Synchronise";
+			this.btnSync.Click += new System.EventHandler(this.btnSync_Click);
 			// 
 			// btnCancel
 			// 
@@ -304,6 +305,13 @@ namespace BlueprintIT.Replicate
 					}
 				}
 			}
+		}
+
+		private void btnSync_Click(object sender, System.EventArgs e)
+		{
+			IStore local = providers.OpenStore(new Uri("file:///"+txtLocal.Text.Replace('\\','/')));
+			IStore remote = providers.OpenStore(new Uri(txtRemote.Text));
+			SyncScan scanner = new SyncScan(local,remote);
 		}
 	}
 }
