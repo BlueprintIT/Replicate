@@ -334,7 +334,7 @@ namespace BlueprintIT.Replicate
 				{
 					if (record.Status==RecordStatus.ChangeConflict)
 					{
-						if ((new ConflictResolution(localrecords,record)).ShowDialog()!=DialogResult.OK)
+						if ((new ChangeConflictResolution(record)).ShowDialog()!=DialogResult.OK)
 						{
 							record.Status=RecordStatus.Ignore;
 							continue;
@@ -342,6 +342,11 @@ namespace BlueprintIT.Replicate
 					}
 					else if (record.Status==RecordStatus.DeleteConflict)
 					{
+						if ((new DeleteConflictResolution(record)).ShowDialog()!=DialogResult.OK)
+						{
+							record.Status=RecordStatus.Ignore;
+							continue;
+						}																												 
 					}
 
 					if (record.Status!=RecordStatus.Ignore)

@@ -119,6 +119,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "DeleteConflictResolution.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "DeleteConflictResolution.resx"
+                    DependentUpon = "DeleteConflictResolution.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Question.cs"
                     SubType = "Form"
                     BuildAction = "Compile"

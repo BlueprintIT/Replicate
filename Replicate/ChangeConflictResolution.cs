@@ -10,10 +10,9 @@ namespace BlueprintIT.Replicate
 	/// <summary>
 	/// Summary description for TypeConflictResolution.
 	/// </summary>
-	public class ConflictResolution : System.Windows.Forms.Form
+	public class ChangeConflictResolution : System.Windows.Forms.Form
 	{
 		private SyncRecord record;
-		private IDictionary records;
 		private System.Windows.Forms.GroupBox groupLocal;
 		private System.Windows.Forms.GroupBox groupRemote;
 		private System.Windows.Forms.Button btnLocalRename;
@@ -37,7 +36,7 @@ namespace BlueprintIT.Replicate
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public ConflictResolution(IDictionary records, SyncRecord record)
+		public ChangeConflictResolution(SyncRecord record)
 		{
 			//
 			// Required for Windows Form Designer support
@@ -48,7 +47,6 @@ namespace BlueprintIT.Replicate
 			string remotetype;
 
 			this.record=record;
-			this.records=records;
 
 			lblLocalName.Text=record.LocalEntry.Uri.LocalPath;
 			lblRemoteName.Text=record.RemoteEntry.Uri.ToString();
@@ -372,7 +370,7 @@ namespace BlueprintIT.Replicate
 			this.btnIgnore.Text = "Ignore...";
 			this.btnIgnore.Click += new System.EventHandler(this.btnIgnore_Click);
 			// 
-			// ConflictResolution
+			// ChangeConflictResolution
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(506, 309);
@@ -383,7 +381,7 @@ namespace BlueprintIT.Replicate
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.Name = "ConflictResolution";
+			this.Name = "ChangeConflictResolution";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Conflict";
