@@ -34,6 +34,98 @@ namespace BlueprintIT.Replicate
 			Scan();
 		}
 
+		/// <summary>
+		/// Stores the synchronisation log for the given folder.
+		/// </summary>
+		/// <param name="folder">The folder to persist information about.</param>
+		private void PersistSyncLog(IFolder folder)
+		{
+			XmlDocument synclog = GetSyncLog(folder);
+
+			IFolder dfolder = folder.GetFolder(SYNCFOLDER);
+			if (!dfolder.Exists)
+			{
+				dfolder.Create();
+				dfolder.Hidden=true;
+			}
+
+			IFile xmlfile = dfolder.GetFile(SYNCFILE);
+			TextWriter writer = xmlfile.OverwriteText();
+			synclog.Save(writer);
+			writer.Close();
+		}
+
+		/// <summary>
+		/// Gets the synchronisation log for a folder.
+		/// </summary>
+		/// <remarks>
+		/// Will return either a new log or the cached log if one exists.
+		/// </remarks>
+		/// <param name="folder">The folder.</param>
+		/// <returns>The synchronisation log. Guaranteed to be the same instance for the same folder.</returns>
+		private XmlDocument GetSyncLog(IFolder folder)
+		{
+			if (logs.Contains(folder))
+			{
+				return (XmlDocument)logs[folder];
+			}
+
+			XmlDocument syncxml = new XmlDocument();
+
+			// Creates the sync log folder if necessary.
+			IFolder dfolder = folder.GetFolder(SYNCFOLDER);
+			if (dfolder.Exists)
+			{
+				// Loads the file or creates a blank one.
+				IFile xmlfile = dfolder.GetFile(SYNCFILE);
+				if (xmlfile.Exists)
+				{
+					try
+					{
+						TextReader reader = xmlfile.OpenText();
+						try
+						{
+							syncxml.Load(reader);
+						}
+						catch (Exception)
+						{
+							syncxml = new XmlDocument();
+						}
+						reader.Close();
+					}
+					catch
+					{
+					}
+				}
+			}
+			logs[folder]=syncxml;
+
+			// Makes the xml document start right.
+			XmlElement root = syncxml.DocumentElement;
+			if (root==null)
+			{
+				root = syncxml.CreateElement("FolderInfo");
+				root.SetAttribute("uri",folder.Uri.ToString());
+				syncxml.AppendChild(root);
+			}
+
+			// Wipes the xml if the uri is not there or wrong.
+			if ((!root.HasAttribute("uri"))||(root.GetAttribute("uri")!=folder.Uri.ToString()))
+			{
+				root.RemoveAll();
+				root.SetAttribute("uri",folder.Uri.ToString());
+			}
+
+			return syncxml;
+		}
+
+		/// <summary>
+		/// Creates a new record during the synchronisation scan.
+		/// </summary>
+		/// <param name="localrecords">Local records to the folder to hold the new record.</param>
+		/// <param name="local">The local entry.</param>
+		/// <param name="remote">The remote entry.</param>
+		/// <returns>The new synchronisation record.</returns>
 		private SyncRecord CreateRecord(IDictionary localrecords, IEntry local, IEntry remote)
 		{
 			SyncRecord record;
@@ -48,7 +140,7 @@ namespace BlueprintIT.Replicate
 			}
 			else
 			{
-				throw new ArgumentNullException("At least local or remot must be non-null");
+				throw new ArgumentNullException("At least local or remote must be non-null");
 			}
 			if (entry.Name!=SYNCFOLDER)
 			{
@@ -76,6 +168,12 @@ namespace BlueprintIT.Replicate
 			return null;
 		}
 
+		/// <summary>
+		/// Creates missing local and remote entries.
+		/// </summary>
+		/// <param name="record">The record ro fill in</param>
+		/// <param name="local">The local folder to the record.</param>
+		/// <param name="remote">The remote folder to the record.</param>
 		private void FillRecord(SyncRecord record, IFolder local, IFolder remote)
 		{
 			if (record.LocalEntry==null)
@@ -109,53 +207,8 @@ namespace BlueprintIT.Replicate
 		/// <param name="remote">The remote equivalent of this folder.</param>
 		private void Scan(IFolder local, IFolder remote)
 		{
-			// Creates the sync log folder if necessary.
-			IFolder dfolder = local.GetFolder(SYNCFOLDER);
-			if (!dfolder.Exists)
-			{
-				dfolder.Create();
-				dfolder.Hidden=true;
-			}
-
-			// Loads the file or creates a blank one.
-			IFile xmlfile = dfolder.GetFile(SYNCFILE);
-			XmlDocument syncxml = new XmlDocument();
-			if (xmlfile.Exists)
-			{
-				try
-				{
-					TextReader reader = xmlfile.OpenText();
-					try
-					{
-						syncxml.Load(reader);
-					}
-					catch (Exception)
-					{
-						syncxml = new XmlDocument();
-					}
-					reader.Close();
-				}
-				catch
-				{
-				}
-			}
-			logs[xmlfile]=syncxml;
-
-			// Makes the xml document start right.
+			XmlDocument syncxml = GetSyncLog(local);
 			XmlElement root = syncxml.DocumentElement;
-			if (root==null)
-			{
-				root = syncxml.CreateElement("FolderInfo");
-				root.SetAttribute("uri",local.Uri.ToString());
-				syncxml.AppendChild(root);
-			}
-
-			// Wipes the xml if the uri is not there or wrong.
-			if ((!root.HasAttribute("uri"))||(root.GetAttribute("uri")!=local.Uri.ToString()))
-			{
-				root.RemoveAll();
-				root.SetAttribute("uri",local.Uri.ToString());
-			}
 
 			IDictionary localrecords = new Hashtable();
 			folderrecords[local]=localrecords;
@@ -236,77 +289,266 @@ namespace BlueprintIT.Replicate
 		private void ResolveConflicts(IFolder folder)
 		{
 			IDictionary localrecords = (IDictionary)folderrecords[folder];
-			foreach (SyncRecord record in localrecords.Values)
+			if (localrecords!=null)
 			{
-				if ((record.Status==RecordStatus.TypeConflict)||(record.Status==RecordStatus.Conflict))
+				foreach (SyncRecord record in localrecords.Values)
 				{
-					if ((new ConflictResolution(localrecords,record)).ShowDialog()!=DialogResult.OK)
+					if (record.Status==RecordStatus.Conflict)
 					{
-						record.Status=RecordStatus.Ignore;
-						continue;
-					}																												 
+						if ((new ConflictResolution(localrecords,record)).ShowDialog()!=DialogResult.OK)
+						{
+							record.Status=RecordStatus.Ignore;
+							continue;
+						}																												 
+					}
+					if ((record.LocalEntry is IFolder)&&(record.LocalEntry.Exists))
+					{
+						ResolveConflicts((IFolder)record.LocalEntry);
+					}
 				}
-				if ((record.LocalEntry is IFolder)&&(record.LocalEntry.Exists))
+			}
+		}
+
+		private void DataTransfer(long size, Stream source, Stream target)
+		{
+			byte[] buffer = new byte[1024];
+			int pos=0;
+			int count;
+			do
+			{
+				count = source.Read(buffer,0,buffer.Length);
+				target.Write(buffer,0,count);
+				pos+=count;
+			} while (count>0);
+			if (pos!=size)
+			{
+				throw new IOException("Invalid number of bytes read from stream");
+			}
+		}
+
+		private void TransferFile(SyncRecord record, IFile source, IFile target)
+		{
+			int pos = 0;
+			IFile tempfile;
+			do
+			{
+				tempfile = target.Folder.GetFile(target.Name+"_repltemp"+pos);
+				pos++;
+			} while (tempfile.Exists);
+
+			// Do the transfer
+			Stream input = null;
+			Stream output = null;
+			try
+			{
+				tempfile.Create();
+				output = tempfile.Overwrite();
+				input = source.Open();
+				DataTransfer(source.Size,input,output);
+				output.Close();
+				input.Close();
+				target.Delete();
+				tempfile.Name=source.Name;
+				if (record.LocalEntry==target)
 				{
-					ResolveConflicts((IFolder)record.LocalEntry);
+					record.LocalEntry=tempfile;
 				}
+				else if (record.RemoteEntry==target)
+				{
+					record.RemoteEntry=tempfile;
+				}
+			}
+			catch (IOException)
+			{
+				output.Close();
+				tempfile.Delete();
+				input.Close();
 			}
 		}
 
 		private void SynchroniseFile(SyncRecord record)
 		{
+			if (record.Status==RecordStatus.Upload)
+			{
+				TransferFile(record,(IFile)record.LocalEntry,(IFile)record.RemoteEntry);
+			}
+			else if (record.Status==RecordStatus.Download)
+			{
+				TransferFile(record,(IFile)record.RemoteEntry,(IFile)record.LocalEntry);
+			}
+		}
+
+		private void TransferFolder(SyncRecord record)
+		{
+			IFolder source;
+			if (record.RemoteEntry.Exists)
+			{
+				record.LocalEntry.Create();
+				source=(IFolder)record.RemoteEntry;
+			}
+			else if (record.LocalEntry.Exists)
+			{
+				record.RemoteEntry.Create();
+				source=(IFolder)record.LocalEntry;
+			}
+			else
+			{
+				return;
+			}
+
+			XmlDocument syncxml = GetSyncLog((IFolder)record.LocalEntry);
+
+			foreach (IFolder folder in source.Folders)
+			{
+				if (folder.Name!=SYNCFOLDER)
+				{
+					SyncRecord subrecord = new SyncRecord(folder.Name);
+					subrecord.LocalEntry=((IFolder)record.LocalEntry).GetFolder(folder.Name);
+					subrecord.RemoteEntry=((IFolder)record.RemoteEntry).GetFolder(folder.Name);
+					subrecord.Description=syncxml.CreateElement("Folder");
+					syncxml.DocumentElement.AppendChild(subrecord.Description);
+					TransferFolder(subrecord);
+					PersistSyncLog((IFolder)record.LocalEntry);
+				}
+			}
+
+			foreach (IFile file in source.Files)
+			{
+				SyncRecord subrecord = new SyncRecord(file.Name);
+				subrecord.LocalEntry=((IFolder)record.LocalEntry).GetFile(file.Name);
+				subrecord.RemoteEntry=((IFolder)record.RemoteEntry).GetFile(file.Name);
+				subrecord.Description=syncxml.CreateElement("File");
+				syncxml.DocumentElement.AppendChild(subrecord.Description);
+				if (source==record.LocalEntry)
+				{
+					TransferFile(subrecord,(IFile)subrecord.LocalEntry,(IFile)subrecord.RemoteEntry);
+				}
+				else
+				{
+					TransferFile(subrecord,(IFile)subrecord.RemoteEntry,(IFile)subrecord.LocalEntry);
+				}
+				PersistSyncLog((IFolder)record.LocalEntry);
+			}
 		}
 
 		private void SynchroniseFolder(SyncRecord record)
 		{
+			TransferFolder(record);
+		}
+
+		/// <summary>
+		/// Synchronises a particular entry.
+		/// </summary>
+		/// <param name="record"></param>
+		private void Synchronise(SyncRecord record)
+		{
+			if (record.Status==RecordStatus.RemoteRename)
+			{
+				SyncRecord newrecord = new SyncRecord(record.NewName);
+				newrecord.RemoteEntry=record.RemoteEntry;
+				if (record.LocalEntry is IFolder)
+				{
+					record.RemoteEntry=record.RemoteEntry.Folder.GetFolder(record.Name);
+				}
+				else
+				{
+					record.RemoteEntry=record.RemoteEntry.Folder.GetFile(record.Name);
+				}
+				if (newrecord.RemoteEntry is IFolder)
+				{
+					newrecord.LocalEntry=record.LocalEntry.Folder.GetFolder(newrecord.Name);
+				}
+				else
+				{
+					newrecord.LocalEntry=record.LocalEntry.Folder.GetFile(newrecord.Name);
+				}
+				newrecord.Status=RecordStatus.Download;
+				record.Status=RecordStatus.Upload;
+				newrecord.RemoteEntry.Name=newrecord.Name;
+				Synchronise(newrecord);
+			}
+			else if (record.Status==RecordStatus.LocalRename)
+			{
+				SyncRecord newrecord = new SyncRecord(record.NewName);
+				newrecord.LocalEntry=record.LocalEntry;
+				if (record.RemoteEntry is IFolder)
+				{
+					record.LocalEntry=record.LocalEntry.Folder.GetFolder(record.Name);
+				}
+				else
+				{
+					record.LocalEntry=record.LocalEntry.Folder.GetFile(record.Name);
+				}
+				if (newrecord.LocalEntry is IFolder)
+				{
+					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFolder(newrecord.Name);
+				}
+				else
+				{
+					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFile(newrecord.Name);
+				}
+				newrecord.Status=RecordStatus.Upload;
+				record.Status=RecordStatus.Download;
+				newrecord.LocalEntry.Name=newrecord.Name;
+				Synchronise(newrecord);
+			}
+
+			if (record.Description==null)
+			{
+				XmlDocument synclog = GetSyncLog(record.LocalEntry.Folder);
+				if (record.LocalEntry is IFile)
+				{
+					record.Description=synclog.CreateElement("File");
+				}
+				else
+				{
+					record.Description=synclog.CreateElement("Folder");
+				}
+				synclog.DocumentElement.AppendChild(record.Description);
+			}
+
+			if (record.Status==RecordStatus.Delete)
+			{
+				record.LocalEntry.Delete();
+				record.RemoteEntry.Delete();
+			}
+			else if ((record.Status==RecordStatus.Download)||
+				(record.Status==RecordStatus.Upload))
+			{
+				if ((record.LocalEntry is IFolder)&&(record.RemoteEntry is IFolder))
+				{
+					SynchroniseFolder(record);
+				}
+
+				if ((record.LocalEntry is IFile)&&(record.RemoteEntry is IFile))
+				{
+					SynchroniseFile(record);
+				}
+			}
+			else if ((record.LocalEntry is IFolder)&&(record.LocalEntry.Exists))
+			{
+				IDictionary localrecords = (IDictionary)folderrecords[record.LocalEntry];
+				foreach (SyncRecord subrecord in localrecords.Values)
+				{
+					Synchronise(subrecord);
+				}
+			}
+			if (record.Status!=RecordStatus.Ignore)
+			{
+				record.Serialise();
+				PersistSyncLog(record.LocalEntry.Folder);
+			}
 		}
 
 		/// <summary>
 		/// Synchronises all the entries in a folder.
 		/// </summary>
-		/// <param name="folder">The folder.</param>
-		private void Synchronise(IFolder folder)
+		private void Synchronise()
 		{
-			IDictionary localrecords = (IDictionary)folderrecords[folder];
+			IDictionary localrecords = (IDictionary)folderrecords[local.Root];
 			foreach (SyncRecord record in localrecords.Values)
 			{
-				Debug.WriteLine(record.LocalEntry.Path+" "+record.Status);
-				if (record.LocalEntry.Exists)
-				{
-					Debug.WriteLine("  Local: "+record.LocalEntry.Uri+" ("+record.LocalStatus+")");
-				}
-				else
-				{
-					Debug.WriteLine("  Local: ("+record.LocalStatus+")");
-				}
-				if (record.RemoteEntry.Exists)
-				{
-					Debug.WriteLine("  Remote: "+record.RemoteEntry.Uri+" ("+record.RemoteStatus+")");
-				}
-				else
-				{
-					Debug.WriteLine("  Remote: ("+record.RemoteStatus+")");
-				}
-
-				if ((record.Status==RecordStatus.Delete)||
-					(record.Status==RecordStatus.Download)||
-					(record.Status==RecordStatus.Upload))
-				{
-					if ((record.LocalEntry is IFolder)&&(record.RemoteEntry is IFolder))
-					{
-						SynchroniseFolder(record);
-					}
-
-					if ((record.LocalEntry is IFile)&&(record.RemoteEntry is IFile))
-					{
-						SynchroniseFile(record);
-					}
-				}
-
-				if ((record.LocalEntry is IFolder)&&(record.LocalEntry.Exists))
-				{
-					Synchronise((IFolder)record.LocalEntry);
-				}
+				Synchronise(record);
 			}
 		}
 
@@ -317,7 +559,7 @@ namespace BlueprintIT.Replicate
 		{
 			Scan(local.Root,remote.Root);
 			ResolveConflicts(local.Root);
-			Synchronise(local.Root);
+			Synchronise();
 		}
 	}
 }

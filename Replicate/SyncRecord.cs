@@ -17,7 +17,7 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public enum RecordStatus
 	{
-		Unknown, TypeConflict, Ignore, Upload, Download, Delete, Conflict
+		Unknown, Ignore, Upload, Download, Delete, Conflict, LocalRename, RemoteRename
 	}
 
 	/// <summary>
@@ -28,6 +28,7 @@ namespace BlueprintIT.Replicate
 		private IEntry local = null;
 		private IEntry remote = null;
 		private string name;
+		private string newname;
 		private XmlElement description;
 		private EntryStatus localStatus = EntryStatus.Unknown;
 		private EntryStatus remoteStatus = EntryStatus.Unknown;
@@ -57,6 +58,22 @@ namespace BlueprintIT.Replicate
 			set
 			{
 				name=value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the new name associated with a rename operation.
+		/// </summary>
+		public string NewName
+		{
+			get
+			{
+				return newname;
+			}
+
+			set
+			{
+				newname=value;
 			}
 		}
 
@@ -195,6 +212,73 @@ namespace BlueprintIT.Replicate
 			else
 			{
 				return EntryStatus.Removed;
+			}
+		}
+
+		public void Serialise()
+		{
+			if ((local.Exists)&&(remote.Exists))
+			{
+				description.SetAttribute("name",name);
+				XmlElement details = null;
+				foreach (XmlElement element in description.GetElementsByTagName("Details"))
+				{
+					if (element.GetAttribute("remoteUri")==remote.Uri.ToString())
+					{
+						details=element;
+						break;
+					}
+				}
+				if (details==null)
+				{
+					details=description.OwnerDocument.CreateElement("Details");
+					details.SetAttribute("remoteUri",remote.Uri.ToString());
+					description.AppendChild(details);
+				}
+				if (local is IFile)
+				{
+					IFile file = (IFile)local;
+					XmlElement element = (XmlElement)details.GetElementsByTagName("Local").Item(0);
+					if (element==null)
+					{
+						element = details.OwnerDocument.CreateElement("Local");
+						details.AppendChild(element);
+					}
+					element.SetAttribute("size",file.Size+"");
+					element.SetAttribute("date",file.Date.ToString(DATEFORMAT));
+				}
+				else
+				{
+					XmlElement element = (XmlElement)details.GetElementsByTagName("Local").Item(0);
+					if (element!=null)
+					{
+						details.RemoveChild(element);
+					}
+				}
+				if (remote is IFile)
+				{
+					IFile file = (IFile)remote;
+					XmlElement element = (XmlElement)details.GetElementsByTagName("Remote").Item(0);
+					if (element==null)
+					{
+						element = details.OwnerDocument.CreateElement("Remote");
+						details.AppendChild(element);
+					}
+					element.SetAttribute("size",file.Size+"");
+					element.SetAttribute("date",file.Date.ToString(DATEFORMAT));
+				}
+				else
+				{
+					XmlElement element = (XmlElement)details.GetElementsByTagName("Remote").Item(0);
+					if (element!=null)
+					{
+						details.RemoveChild(element);
+					}
+				}
+			}
+			else
+			{
+				description.ParentNode.RemoveChild(description);
 			}
 		}
 

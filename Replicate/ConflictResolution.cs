@@ -58,9 +58,12 @@ namespace BlueprintIT.Replicate
 			if (record.LocalEntry is IFile)
 			{
 				localtype="file";
-				IFile localFile = (IFile)record.LocalEntry;
-				lblLocalDate.Text+=localFile.Date.ToString();
-				lblLocalSize.Text+=localFile.Size.ToString();
+				if (record.LocalEntry.Exists)
+				{
+					IFile localFile = (IFile)record.LocalEntry;
+					lblLocalDate.Text+=localFile.Date.ToString();
+					lblLocalSize.Text+=localFile.Size.ToString();
+				}
 			}
 			else
 			{
@@ -72,9 +75,12 @@ namespace BlueprintIT.Replicate
 			if (record.RemoteEntry is IFile)
 			{
 				remotetype="file";
-				IFile remoteFile = (IFile)record.RemoteEntry;
-				lblRemoteDate.Text+=remoteFile.Date.ToString();
-				lblRemoteSize.Text+=remoteFile.Size.ToString();
+				if (record.RemoteEntry.Exists)
+				{
+					IFile remoteFile = (IFile)record.RemoteEntry;
+					lblRemoteDate.Text+=remoteFile.Date.ToString();
+					lblRemoteSize.Text+=remoteFile.Size.ToString();
+				}
 			}
 			else
 			{
@@ -429,12 +435,14 @@ namespace BlueprintIT.Replicate
 				{
 					foundnewname=false;
 					MessageBox.Show("A file or folder with that name already exists locally.");
+					continue;
 				}
 				folder = record.RemoteEntry.Folder;
 				if (folder[newname]!=null)
 				{
 					foundnewname=false;
 					MessageBox.Show("A file or folder with that name already exists remotely.");
+					continue;
 				}
 			}
 			return newname;
@@ -445,33 +453,8 @@ namespace BlueprintIT.Replicate
 			string newname = FindNewName();
 			if (newname!=null)
 			{
-				IEntry local = record.LocalEntry;
-				local.Name=newname;
-
-				if (record.RemoteEntry is IFile)
-				{
-					record.LocalEntry = local.Folder.GetFile(record.RemoteEntry.Name);
-				}
-				else
-				{
-					record.LocalEntry = local.Folder.GetFolder(record.RemoteEntry.Name);
-				}
-
-				// TODO need to put the new SyncRecord somewhere.
-				SyncRecord newrecord = new SyncRecord(newname);
-				newrecord.LocalEntry=local;
-				if (local is IFile)
-				{
-					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFile(newname);
-				}
-				else
-				{
-					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFolder(newname);
-				}
-				newrecord.Status=RecordStatus.Upload;
-				records[newname]=newrecord;
-
-				record.Status=RecordStatus.Download;
+				record.Status=RecordStatus.LocalRename;
+				record.NewName=newname;
 				DialogResult=DialogResult.OK;
 			}
 		}
@@ -481,33 +464,8 @@ namespace BlueprintIT.Replicate
 			string newname = FindNewName();
 			if (newname!=null)
 			{
-				IEntry remote = record.RemoteEntry;
-				remote.Name=newname;
-
-				if (record.LocalEntry is IFile)
-				{
-					record.RemoteEntry = remote.Folder.GetFile(record.LocalEntry.Name);
-				}
-				else
-				{
-					record.RemoteEntry = remote.Folder.GetFolder(record.LocalEntry.Name);
-				}
-
-				// TODO need to put the new SyncRecord somewhere.
-				SyncRecord newrecord = new SyncRecord(newname);
-				newrecord.RemoteEntry=remote;
-				if (remote is IFile)
-				{
-					newrecord.LocalEntry=record.LocalEntry.Folder.GetFile(newname);
-				}
-				else
-				{
-					newrecord.LocalEntry=record.LocalEntry.Folder.GetFolder(newname);
-				}
-				newrecord.Status=RecordStatus.Download;
-				records[newname]=newrecord;
-
-				record.Status=RecordStatus.Upload;
+				record.Status=RecordStatus.RemoteRename;
+				record.NewName=newname;
 				DialogResult=DialogResult.OK;
 			}
 		}
