@@ -109,6 +109,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "ConflictResolution.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ConflictResolution.resx"
+                    DependentUpon = "ConflictResolution.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Question.cs"
                     SubType = "Form"
                     BuildAction = "Compile"

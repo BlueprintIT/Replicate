@@ -9,7 +9,7 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public enum EntryStatus
 	{
-		Unknown, Nonexistent, Added, Removed, Updated, Unchanged
+		Unknown, Nonexistent, Added, Removed, Updated, Unchanged, Replaced
 	}
 
 	/// <summary>
@@ -162,7 +162,7 @@ namespace BlueprintIT.Replicate
 			{
 				if (description.Name=="Folder")
 				{
-					return EntryStatus.Added;
+					return EntryStatus.Replaced;
 				}
 				IFile file = (IFile)entry;
 				if (element!=null)
@@ -188,7 +188,7 @@ namespace BlueprintIT.Replicate
 			{
 				if (description.Name=="File")
 				{
-					return EntryStatus.Added;
+					return EntryStatus.Replaced;
 				}
 				return EntryStatus.Unchanged;
 			}
@@ -244,12 +244,12 @@ namespace BlueprintIT.Replicate
 			}
 
 			// Makes the final status for the record.
-			if ((((local is IFile)&&(remote is IFolder))||((local is IFolder)&&(remote is IFile)))&&
+			/*if ((((local is IFile)&&(remote is IFolder))||((local is IFolder)&&(remote is IFile)))&&
 				((local.Exists)&&(remote.Exists)))
 			{
 				status=RecordStatus.TypeConflict;
 				return;
-			}
+			}*/
 
 			if ((localStatus==EntryStatus.Unchanged)&&(remoteStatus==EntryStatus.Unchanged))
 			{
@@ -266,10 +266,10 @@ namespace BlueprintIT.Replicate
 				status=RecordStatus.Ignore;
 				return;
 			}
-			if (((localStatus==EntryStatus.Added)||(localStatus==EntryStatus.Updated))&&
-				((remoteStatus==EntryStatus.Added)||(remoteStatus==EntryStatus.Updated)))
+			if (((localStatus==EntryStatus.Added)||(localStatus==EntryStatus.Updated)||(localStatus==EntryStatus.Replaced))&&
+				((remoteStatus==EntryStatus.Added)||(remoteStatus==EntryStatus.Updated)||(remoteStatus==EntryStatus.Replaced)))
 			{
-				if (local is IFolder)
+				if ((local is IFolder)&&(remote is IFolder))
 				{
 					status=RecordStatus.Ignore;
 					return;
@@ -280,12 +280,12 @@ namespace BlueprintIT.Replicate
 					return;
 				}
 			}
-			if ((localStatus==EntryStatus.Removed)&&(remoteStatus==EntryStatus.Added))
+			if ((localStatus==EntryStatus.Removed)&&((remoteStatus==EntryStatus.Added)||(remoteStatus==EntryStatus.Replaced)))
 			{
 				status=RecordStatus.Download;
 				return;
 			}
-			if ((remoteStatus==EntryStatus.Removed)&&(localStatus==EntryStatus.Added))
+			if ((remoteStatus==EntryStatus.Removed)&&((localStatus==EntryStatus.Added)||(localStatus==EntryStatus.Replaced)))
 			{
 				status=RecordStatus.Upload;
 				return;
@@ -305,12 +305,12 @@ namespace BlueprintIT.Replicate
 				status=RecordStatus.Delete;
 				return;
 			}
-			if ((localStatus==EntryStatus.Added)||(localStatus==EntryStatus.Updated))
+			if ((localStatus==EntryStatus.Added)||(localStatus==EntryStatus.Updated)||(localStatus==EntryStatus.Replaced))
 			{
 				status=RecordStatus.Upload;
 				return;
 			}
-			if ((remoteStatus==EntryStatus.Added)||(remoteStatus==EntryStatus.Updated))
+			if ((remoteStatus==EntryStatus.Added)||(remoteStatus==EntryStatus.Updated)||(remoteStatus==EntryStatus.Replaced))
 			{
 				status=RecordStatus.Download;
 				return;

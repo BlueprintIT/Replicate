@@ -253,6 +253,10 @@ namespace BlueprintIT.Replicate
 				{
 					Debug.WriteLine("  Remote: ("+record.RemoteStatus+")");
 				}
+				if ((record.Status==RecordStatus.TypeConflict)||(record.Status==RecordStatus.Conflict))
+				{
+					(new ConflictResolution(record)).ShowDialog();
+				}
 			}
 		}
 	}
