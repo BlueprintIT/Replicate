@@ -70,11 +70,6 @@
                     HintPath = "C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.dll"
                 />
                 <Reference
-                    Name = "System.Data"
-                    AssemblyName = "System.Data"
-                    HintPath = "C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Data.dll"
-                />
-                <Reference
                     Name = "System.Drawing"
                     AssemblyName = "System.Drawing"
                     HintPath = "C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Drawing.dll"
@@ -94,6 +89,16 @@
                     Project = "{7B9024AF-E9F9-4B8D-9398-4816BFB5B94A}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
+                <Reference
+                    Name = "FileStore"
+                    Project = "{79C1F33E-EB2A-4C51-B97F-0A8929553FC9}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
+                <Reference
+                    Name = "System.Data"
+                    AssemblyName = "System.Data"
+                    HintPath = "C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.Data.dll"
+                />
             </References>
         </Build>
         <Files>
@@ -104,7 +109,42 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Question.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Question.resx"
+                    DependentUpon = "Question.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Synchronise.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "SyncOptions.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "SyncOptions.resx"
+                    DependentUpon = "SyncOptions.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "SyncSelector.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "SyncSelector.resx"
+                    DependentUpon = "SyncSelector.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "SyncSettings.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

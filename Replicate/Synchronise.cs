@@ -31,7 +31,7 @@ namespace BlueprintIT.Replicate
 		public void ShowGUI()
 		{
 			Application.EnableVisualStyles();
-			//Application.Run(new Gui());
+			Application.Run(new SyncSelector(providers));
 		}
 
 		/// <summary>
