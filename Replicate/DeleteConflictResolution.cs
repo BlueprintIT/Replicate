@@ -17,6 +17,7 @@ namespace BlueprintIT.Replicate
 		private System.Windows.Forms.Button btnRename;
 		private System.Windows.Forms.Button btnKeep;
 		private System.Windows.Forms.Button btnView;
+		private System.Windows.Forms.Label lblDescription;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -30,6 +31,37 @@ namespace BlueprintIT.Replicate
 			InitializeComponent();
 
 			this.record=record;
+			string deleted = "";
+			string changed = "";
+			string type = "";
+			if (record.LocalEntry.Exists)
+			{
+				changed="local";
+				deleted="remote";
+				if (record.LocalEntry is IFile)
+				{
+					type="file";
+				}
+				else
+				{
+					type="folder";
+				}
+			}
+			else if (record.RemoteEntry.Exists)
+			{
+				changed="remote";
+				deleted="local";
+				if (record.RemoteEntry is IFile)
+				{
+					type="file";
+				}
+				else
+				{
+					type="folder";
+				}
+			}
+			lblDescription.Text="A "+deleted+" "+type+" was deleted, but the "+changed+" "+type+" was changed. Select "+
+				"what you want to do with the "+changed+" "+type+".";
 		}
 
 		/// <summary>
@@ -58,12 +90,13 @@ namespace BlueprintIT.Replicate
 			this.btnRename = new System.Windows.Forms.Button();
 			this.btnKeep = new System.Windows.Forms.Button();
 			this.btnView = new System.Windows.Forms.Button();
+			this.lblDescription = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// btnDelete
 			// 
 			this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnDelete.Location = new System.Drawing.Point(104, 272);
+			this.btnDelete.Location = new System.Drawing.Point(40, 128);
 			this.btnDelete.Name = "btnDelete";
 			this.btnDelete.TabIndex = 0;
 			this.btnDelete.Text = "Delete...";
@@ -72,7 +105,7 @@ namespace BlueprintIT.Replicate
 			// btnRename
 			// 
 			this.btnRename.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnRename.Location = new System.Drawing.Point(208, 272);
+			this.btnRename.Location = new System.Drawing.Point(136, 128);
 			this.btnRename.Name = "btnRename";
 			this.btnRename.TabIndex = 1;
 			this.btnRename.Text = "Rename...";
@@ -81,7 +114,7 @@ namespace BlueprintIT.Replicate
 			// btnKeep
 			// 
 			this.btnKeep.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnKeep.Location = new System.Drawing.Point(312, 272);
+			this.btnKeep.Location = new System.Drawing.Point(232, 128);
 			this.btnKeep.Name = "btnKeep";
 			this.btnKeep.TabIndex = 2;
 			this.btnKeep.Text = "Keep...";
@@ -91,15 +124,27 @@ namespace BlueprintIT.Replicate
 			// 
 			this.btnView.Enabled = false;
 			this.btnView.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnView.Location = new System.Drawing.Point(208, 224);
+			this.btnView.Location = new System.Drawing.Point(136, 80);
 			this.btnView.Name = "btnView";
 			this.btnView.TabIndex = 3;
 			this.btnView.Text = "View...";
 			// 
+			// lblDescription
+			// 
+			this.lblDescription.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.lblDescription.Location = new System.Drawing.Point(24, 24);
+			this.lblDescription.Name = "lblDescription";
+			this.lblDescription.Size = new System.Drawing.Size(296, 40);
+			this.lblDescription.TabIndex = 4;
+			this.lblDescription.Text = "A local folder was deleted, but the remote folder was changed. Select what you wa" +
+				"nt to do with the remote folder.";
+			this.lblDescription.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			// 
 			// DeleteConflictResolution
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(490, 317);
+			this.ClientSize = new System.Drawing.Size(346, 173);
+			this.Controls.Add(this.lblDescription);
 			this.Controls.Add(this.btnView);
 			this.Controls.Add(this.btnKeep);
 			this.Controls.Add(this.btnRename);
