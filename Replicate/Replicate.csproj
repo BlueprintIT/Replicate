@@ -109,13 +109,13 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "ConflictResolution.cs"
+                    RelPath = "ChangeConflictResolution.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "ConflictResolution.resx"
-                    DependentUpon = "ConflictResolution.cs"
+                    RelPath = "ChangeConflictResolution.resx"
+                    DependentUpon = "ChangeConflictResolution.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File

@@ -17,7 +17,7 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public enum RecordStatus
 	{
-		Unknown, Ignore, Upload, Download, Delete, Conflict, LocalRename, RemoteRename
+		Unknown, Ignore, Upload, Download, Delete, ChangeConflict, DeleteConflict, LocalRename, RemoteRename
 	}
 
 	/// <summary>
@@ -360,7 +360,7 @@ namespace BlueprintIT.Replicate
 				}
 				else
 				{
-					status=RecordStatus.Conflict;
+					status=RecordStatus.ChangeConflict;
 					return;
 				}
 			}
@@ -376,12 +376,12 @@ namespace BlueprintIT.Replicate
 			}
 			if ((localStatus==EntryStatus.Removed)&&(remoteStatus==EntryStatus.Updated))
 			{
-				status=RecordStatus.Conflict;
+				status=RecordStatus.DeleteConflict;
 				return;
 			}
 			if ((remoteStatus==EntryStatus.Removed)&&(localStatus==EntryStatus.Updated))
 			{
-				status=RecordStatus.Conflict;
+				status=RecordStatus.DeleteConflict;
 				return;
 			}
 			if ((remoteStatus==EntryStatus.Removed)||(localStatus==EntryStatus.Removed))

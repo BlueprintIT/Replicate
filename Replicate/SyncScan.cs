@@ -16,6 +16,14 @@ namespace BlueprintIT.Replicate
 		private IStore local,remote;
 		private static string SYNCFOLDER = ".Sync";
 		private static string SYNCFILE = "synclog.xml";
+		private int downloads = 0;
+		private long downloadSize = 0;
+		private int uploads = 0;
+		private long uploadSize = 0;
+		private int localDeletes = 0;
+		private int remoteDeletes = 0;
+		private int localOverwrites = 0;
+		private int remoteOverwrites = 0;
 
 		// Maps between IFolders and an IDictionary which maps between names and SyncRecords
 		private IDictionary folderrecords = new Hashtable();
@@ -282,6 +290,37 @@ namespace BlueprintIT.Replicate
 			}
 		}
 
+		private void TotUp(IEntry entry, ref int total, ref long size)
+		{
+			if (entry is IFile)
+			{
+				total++;
+				size+=((IFile)entry).Size;
+			}
+			else
+			{
+				IFolder folder = (IFolder)entry;
+				foreach (IEntry subentry in folder.Folders)
+				{
+					TotUp(subentry,ref total, ref size);
+				}
+				foreach (IEntry subentry in folder.Files)
+				{
+					TotUp(subentry,ref total, ref size);
+				}
+			}
+		}
+
+		private void AddDownload(SyncRecord record)
+		{
+			TotUp(record.RemoteEntry,ref downloads,ref downloadSize);
+		}
+
+		private void AddUpload(SyncRecord record)
+		{
+			TotUp(record.LocalEntry,ref uploads,ref uploadSize);
+		}
+
 		/// <summary>
 		/// Resolves any detected conflicts.
 		/// </summary>
@@ -293,13 +332,63 @@ namespace BlueprintIT.Replicate
 			{
 				foreach (SyncRecord record in localrecords.Values)
 				{
-					if (record.Status==RecordStatus.Conflict)
+					if (record.Status==RecordStatus.ChangeConflict)
 					{
 						if ((new ConflictResolution(localrecords,record)).ShowDialog()!=DialogResult.OK)
 						{
 							record.Status=RecordStatus.Ignore;
 							continue;
 						}																												 
+					}
+					else if (record.Status==RecordStatus.DeleteConflict)
+					{
+					}
+
+					if (record.Status!=RecordStatus.Ignore)
+					{
+						if (record.Status==RecordStatus.Delete)
+						{
+							if (record.RemoteEntry.Exists)
+							{
+								remoteDeletes++;
+							}
+							if (record.LocalEntry.Exists)
+							{
+								localDeletes++;
+							}
+						}
+						else if (record.Status==RecordStatus.Download)
+						{
+							if (record.LocalEntry.Exists)
+							{
+								localOverwrites++;
+							}
+							AddDownload(record);
+						}
+						else if (record.Status==RecordStatus.Upload)
+						{
+							if (record.RemoteEntry.Exists)
+							{
+								remoteOverwrites++;
+							}
+							AddUpload(record);
+						}
+						else if (record.Status==RecordStatus.LocalRename)
+						{
+							AddUpload(record);
+							if (record.RemoteEntry.Exists)
+							{
+								AddDownload(record);
+							}
+						}
+						else if (record.Status==RecordStatus.RemoteRename)
+						{
+							AddDownload(record);
+							if (record.LocalEntry.Exists)
+							{
+								AddUpload(record);
+							}
+						}
 					}
 					if ((record.LocalEntry is IFolder)&&(record.LocalEntry.Exists))
 					{
@@ -463,7 +552,14 @@ namespace BlueprintIT.Replicate
 					newrecord.LocalEntry=record.LocalEntry.Folder.GetFile(newrecord.Name);
 				}
 				newrecord.Status=RecordStatus.Download;
-				record.Status=RecordStatus.Upload;
+				if (record.LocalEntry.Exists)
+				{
+					record.Status=RecordStatus.Upload;
+				}
+				else
+				{
+					record.Status=RecordStatus.Delete;
+				}
 				newrecord.RemoteEntry.Name=newrecord.Name;
 				Synchronise(newrecord);
 			}
@@ -488,7 +584,14 @@ namespace BlueprintIT.Replicate
 					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFile(newrecord.Name);
 				}
 				newrecord.Status=RecordStatus.Upload;
-				record.Status=RecordStatus.Download;
+				if (record.RemoteEntry.Exists)
+				{
+					record.Status=RecordStatus.Download;
+				}
+				else
+				{
+					record.Status=RecordStatus.Delete;
+				}
 				newrecord.LocalEntry.Name=newrecord.Name;
 				Synchronise(newrecord);
 			}
