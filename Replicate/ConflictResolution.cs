@@ -393,7 +393,7 @@ namespace BlueprintIT.Replicate
 			if (MessageBox.Show("If you ignore this conflict you will be prompted again the next time you synchronise. Are you sure you wish to ignore this conflict?","Ignore?",MessageBoxButtons.YesNo,MessageBoxIcon.Question)==DialogResult.Yes)
 			{
 				record.Status=RecordStatus.Ignore;
-				this.DialogResult=DialogResult.OK;
+				this.DialogResult=DialogResult.Cancel;
 			}
 		}
 
@@ -469,7 +469,7 @@ namespace BlueprintIT.Replicate
 					newrecord.RemoteEntry=record.RemoteEntry.Folder.GetFolder(newname);
 				}
 				newrecord.Status=RecordStatus.Upload;
-				records[local.Path]=newrecord;
+				records[newname]=newrecord;
 
 				record.Status=RecordStatus.Download;
 				DialogResult=DialogResult.OK;
@@ -505,7 +505,7 @@ namespace BlueprintIT.Replicate
 					newrecord.LocalEntry=record.LocalEntry.Folder.GetFolder(newname);
 				}
 				newrecord.Status=RecordStatus.Download;
-				records[remote.Path]=newrecord;
+				records[newname]=newrecord;
 
 				record.Status=RecordStatus.Upload;
 				DialogResult=DialogResult.OK;

@@ -3,6 +3,7 @@ using System.IO;
 using System.Xml;
 using System.Diagnostics;
 using System.Collections;
+using System.Windows.Forms;
 using BlueprintIT.Storage;
 
 namespace BlueprintIT.Replicate
@@ -15,7 +16,10 @@ namespace BlueprintIT.Replicate
 		private IStore local,remote;
 		private static string SYNCFOLDER = ".Sync";
 		private static string SYNCFILE = "synclog.xml";
-		private IDictionary records = new Hashtable();
+
+		// Maps between IFolders and an IDictionary which maps between names and SyncRecords
+		private IDictionary folderrecords = new Hashtable();
+		// Maps between IFolders and XMLDocuments.
 		private IDictionary logs = new Hashtable();
 
 		/// <summary>
@@ -30,7 +34,7 @@ namespace BlueprintIT.Replicate
 			Scan();
 		}
 
-		private SyncRecord CreateRecord(IEntry local, IEntry remote, IDictionary list)
+		private SyncRecord CreateRecord(IDictionary localrecords, IEntry local, IEntry remote)
 		{
 			SyncRecord record;
 			IEntry entry;
@@ -48,15 +52,14 @@ namespace BlueprintIT.Replicate
 			}
 			if (entry.Name!=SYNCFOLDER)
 			{
-				if (records.Contains(entry.Path))
+				if (localrecords.Contains(entry.Name))
 				{
-					record = (SyncRecord)records[entry.Path];
+					record = (SyncRecord)localrecords[entry.Name];
 				}
 				else
 				{
 					record = new SyncRecord(entry.Name);
-					records[entry.Path]=record;
-					list[entry.Name]=record;
+					localrecords[entry.Name]=record;
 				}
 
 				if (local!=null)
@@ -154,19 +157,17 @@ namespace BlueprintIT.Replicate
 				root.SetAttribute("uri",local.Uri.ToString());
 			}
 
-			IDictionary list = new Hashtable();
-			IList localfolders = new ArrayList();
+			IDictionary localrecords = new Hashtable();
+			folderrecords[local]=localrecords;
 
 			// Makes sync records for local folders and files.
 			foreach (IEntry entry in local.Folders)
 			{
-				SyncRecord record = CreateRecord(entry,null,list);
-				if (record!=null)
-					localfolders.Add(record);
+				CreateRecord(localrecords,entry,null);
 			}
 			foreach (IEntry entry in local.Files)
 			{
-				CreateRecord(entry,null,list);
+				CreateRecord(localrecords,entry,null);
 			}
 
 			// Makes sync records for remote folders and files.
@@ -174,14 +175,15 @@ namespace BlueprintIT.Replicate
 			{
 				foreach (IEntry entry in remote.Folders)
 				{
-					CreateRecord(null,entry,list);
+					CreateRecord(localrecords,null,entry);
 				}
 				foreach (IEntry entry in remote.Files)
 				{
-					CreateRecord(null,entry,list);
+					CreateRecord(localrecords,null,entry);
 				}
 			}
 
+			IDictionary list = new Hashtable(localrecords);
 			// Applies pre-existing xml descriptions to the sync records.
 			foreach (XmlNode node in root.ChildNodes)
 			{
@@ -215,9 +217,9 @@ namespace BlueprintIT.Replicate
 			}
 
 			// Scans sub folders that exist locally.
-			foreach (SyncRecord record in localfolders)
+			foreach (SyncRecord record in localrecords.Values)
 			{
-				if (record.RemoteEntry.Exists)
+				if ((record.RemoteEntry.Exists)&&(record.LocalEntry.Exists))
 				{
 					if ((record.LocalEntry is IFolder)&&(record.RemoteEntry is IFolder))
 					{
@@ -228,15 +230,47 @@ namespace BlueprintIT.Replicate
 		}
 
 		/// <summary>
-		/// Scans the stores.
+		/// Resolves any detected conflicts.
 		/// </summary>
-		private void Scan()
+		/// <param name="folder">The folder to work from.</param>
+		private void ResolveConflicts(IFolder folder)
 		{
-			Scan(local.Root,remote.Root);
-			foreach (string path in records.Keys)
+			IDictionary localrecords = (IDictionary)folderrecords[folder];
+			foreach (SyncRecord record in localrecords.Values)
 			{
-				SyncRecord record = (SyncRecord)records[path];
-				Debug.WriteLine(path+" "+record.Status);
+				if ((record.Status==RecordStatus.TypeConflict)||(record.Status==RecordStatus.Conflict))
+				{
+					if ((new ConflictResolution(localrecords,record)).ShowDialog()!=DialogResult.OK)
+					{
+						record.Status=RecordStatus.Ignore;
+						continue;
+					}																												 
+				}
+				if ((record.LocalEntry is IFolder)&&(record.LocalEntry.Exists))
+				{
+					ResolveConflicts((IFolder)record.LocalEntry);
+				}
+			}
+		}
+
+		private void SynchroniseFile(SyncRecord record)
+		{
+		}
+
+		private void SynchroniseFolder(SyncRecord record)
+		{
+		}
+
+		/// <summary>
+		/// Synchronises all the entries in a folder.
+		/// </summary>
+		/// <param name="folder">The folder.</param>
+		private void Synchronise(IFolder folder)
+		{
+			IDictionary localrecords = (IDictionary)folderrecords[folder];
+			foreach (SyncRecord record in localrecords.Values)
+			{
+				Debug.WriteLine(record.LocalEntry.Path+" "+record.Status);
 				if (record.LocalEntry.Exists)
 				{
 					Debug.WriteLine("  Local: "+record.LocalEntry.Uri+" ("+record.LocalStatus+")");
@@ -253,11 +287,37 @@ namespace BlueprintIT.Replicate
 				{
 					Debug.WriteLine("  Remote: ("+record.RemoteStatus+")");
 				}
-				if ((record.Status==RecordStatus.TypeConflict)||(record.Status==RecordStatus.Conflict))
+
+				if ((record.Status==RecordStatus.Delete)||
+					(record.Status==RecordStatus.Download)||
+					(record.Status==RecordStatus.Upload))
 				{
-					(new ConflictResolution(records,record)).ShowDialog();
+					if ((record.LocalEntry is IFolder)&&(record.RemoteEntry is IFolder))
+					{
+						SynchroniseFolder(record);
+					}
+
+					if ((record.LocalEntry is IFile)&&(record.RemoteEntry is IFile))
+					{
+						SynchroniseFile(record);
+					}
+				}
+
+				if ((record.LocalEntry is IFolder)&&(record.LocalEntry.Exists))
+				{
+					Synchronise((IFolder)record.LocalEntry);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Scans the stores.
+		/// </summary>
+		private void Scan()
+		{
+			Scan(local.Root,remote.Root);
+			ResolveConflicts(local.Root);
+			Synchronise(local.Root);
 		}
 	}
 }
