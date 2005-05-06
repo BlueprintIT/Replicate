@@ -153,6 +153,7 @@ namespace BlueprintIT.Replicate
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
 			this.Name = "DeleteConflictResolution";
+			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Conflict";
 			this.ResumeLayout(false);

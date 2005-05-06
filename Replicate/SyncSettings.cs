@@ -17,6 +17,10 @@ namespace BlueprintIT.Replicate
 		{
 		}
 
+		public void Test(params object[] args)
+		{
+		}
+
 		public SyncSettings(string id)
 		{
 			this.id=id;
