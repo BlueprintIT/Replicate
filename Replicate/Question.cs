@@ -1,8 +1,16 @@
+/*
+ * $HeadURL$
+ * $LastChangedBy$
+ * $Date$
+ * $Revision$
+ */
+
 using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using log4net;
 
 namespace BlueprintIT.Replicate
 {
@@ -11,6 +19,8 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public class Question : System.Windows.Forms.Form
 	{
+		private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Button button2;
 		private System.Windows.Forms.TextBox txtAnswer;

@@ -1,3 +1,10 @@
+/*
+ * $HeadURL$
+ * $LastChangedBy$
+ * $Date$
+ * $Revision$
+ */
+
 using System;
 using System.IO;
 using System.Xml;
@@ -5,6 +12,7 @@ using System.Diagnostics;
 using System.Collections;
 using System.Windows.Forms;
 using BlueprintIT.Storage;
+using log4net;
 
 namespace BlueprintIT.Replicate
 {
@@ -13,6 +21,8 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public class SyncScan
 	{
+		private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private IStore local,remote;
 		private static string SYNCFOLDER = ".Sync";
 		private static string SYNCFILE = "synclog.xml";

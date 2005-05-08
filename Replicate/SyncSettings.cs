@@ -1,5 +1,13 @@
+/*
+ * $HeadURL$
+ * $LastChangedBy$
+ * $Date$
+ * $Revision$
+ */
+
 using System;
 using Microsoft.Win32;
+using log4net;
 
 namespace BlueprintIT.Replicate
 {
@@ -8,6 +16,8 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public class SyncSettings
 	{
+		private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private Uri local;
 		private Uri remote;
 		private string name;

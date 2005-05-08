@@ -1,6 +1,14 @@
+/*
+ * $HeadURL$
+ * $LastChangedBy$
+ * $Date$
+ * $Revision$
+ */
+
 using System;
 using System.Xml;
 using BlueprintIT.Storage;
+using log4net;
 
 namespace BlueprintIT.Replicate
 {
@@ -25,6 +33,8 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public class SyncRecord
 	{
+		private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private IEntry local = null;
 		private IEntry remote = null;
 		private string name;

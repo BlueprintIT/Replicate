@@ -1,9 +1,18 @@
+/*
+ * $HeadURL$
+ * $LastChangedBy$
+ * $Date$
+ * $Revision$
+ */
+
 using System;
+using System.IO;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using BlueprintIT.Storage;
+using log4net;
 
 namespace BlueprintIT.Replicate
 {
@@ -12,10 +21,11 @@ namespace BlueprintIT.Replicate
 	/// </summary>
 	public class SyncOptions : System.Windows.Forms.Form
 	{
+		private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		private StorageProviders providers;
 		private ArrayList protocols = new ArrayList();
-		private SyncSettings settings;
-		private bool changed = false;
+		private State.State settings;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.Button btnLocalBrowse;
@@ -27,13 +37,13 @@ namespace BlueprintIT.Replicate
 		private System.Windows.Forms.TextBox txtLocal;
 		private System.Windows.Forms.TextBox txtRemote;
 		private System.Windows.Forms.Button btnCancel;
-		private System.Windows.Forms.Button btnSync;
+		private System.Windows.Forms.Button btnOk;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public SyncOptions(StorageProviders providers)
+		private SyncOptions()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -41,16 +51,30 @@ namespace BlueprintIT.Replicate
 			InitializeComponent();
 
 			this.providers=providers;
-			foreach (IStoreProvider provider in providers)
+			foreach (IStoreProvider provider in StorageProviders.Providers)
 			{
 				protocols.Add(provider);
 				cmbProtocol.Items.Add(provider.DisplayName);
 			}
 			cmbProtocol.SelectedIndex=0;
-			settings = new SyncSettings();
 		}
 
-		public SyncOptions(StorageProviders providers, SyncSettings settings): this(providers)
+		public SyncOptions(DirectoryInfo dir): this()
+		{
+			settings = new State.State(GetUniqueFile(dir));
+		}
+
+		private FileInfo GetUniqueFile(DirectoryInfo dir)
+		{
+			int id=0;
+			while (File.Exists(dir.FullName+"\\sync"+id+".sync"))
+			{
+				id++;
+			}
+			return new FileInfo(dir.FullName+"\\sync"+id+".sync");
+		}
+
+		public SyncOptions(State.State settings): this()
 		{
 			this.settings=settings;
 			txtLocal.Text=settings.LocalUri.LocalPath;
@@ -65,7 +89,6 @@ namespace BlueprintIT.Replicate
 				pos++;
 			}
 			txtRemote.Text=settings.RemoteUri.ToString();
-			changed=false;
 		}
 
 		/// <summary>
@@ -99,9 +122,9 @@ namespace BlueprintIT.Replicate
 			this.label2 = new System.Windows.Forms.Label();
 			this.cmbProtocol = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
-			this.btnSync = new System.Windows.Forms.Button();
-			this.btnCancel = new System.Windows.Forms.Button();
 			this.folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+			this.btnCancel = new System.Windows.Forms.Button();
+			this.btnOk = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -134,7 +157,6 @@ namespace BlueprintIT.Replicate
 			this.txtLocal.Size = new System.Drawing.Size(272, 20);
 			this.txtLocal.TabIndex = 0;
 			this.txtLocal.Text = "";
-			this.txtLocal.TextChanged += new System.EventHandler(this.txtLocal_TextChanged);
 			// 
 			// groupBox2
 			// 
@@ -167,7 +189,6 @@ namespace BlueprintIT.Replicate
 			this.txtRemote.Size = new System.Drawing.Size(248, 20);
 			this.txtRemote.TabIndex = 3;
 			this.txtRemote.Text = "";
-			this.txtRemote.TextChanged += new System.EventHandler(this.txtRemote_TextChanged);
 			// 
 			// label2
 			// 
@@ -196,14 +217,9 @@ namespace BlueprintIT.Replicate
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Files are held on:";
 			// 
-			// btnSync
+			// folderBrowser
 			// 
-			this.btnSync.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnSync.Location = new System.Drawing.Point(88, 240);
-			this.btnSync.Name = "btnSync";
-			this.btnSync.TabIndex = 2;
-			this.btnSync.Text = "Synchronise";
-			this.btnSync.Click += new System.EventHandler(this.btnSync_Click);
+			this.folderBrowser.Description = "Select the local files:";
 			// 
 			// btnCancel
 			// 
@@ -214,22 +230,27 @@ namespace BlueprintIT.Replicate
 			this.btnCancel.TabIndex = 3;
 			this.btnCancel.Text = "Cancel";
 			// 
-			// folderBrowser
+			// btnOk
 			// 
-			this.folderBrowser.Description = "Select the local files:";
+			this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
+			this.btnOk.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnOk.Location = new System.Drawing.Point(88, 240);
+			this.btnOk.Name = "btnOk";
+			this.btnOk.TabIndex = 4;
+			this.btnOk.Text = "OK";
+			this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
 			// 
 			// SyncOptions
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(408, 283);
+			this.Controls.Add(this.btnOk);
 			this.Controls.Add(this.btnCancel);
-			this.Controls.Add(this.btnSync);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "SyncOptions";
 			this.Text = "Synchronise Options";
-			this.Closing += new System.ComponentModel.CancelEventHandler(this.SyncOptions_Closing);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox2.ResumeLayout(false);
 			this.ResumeLayout(false);
@@ -271,47 +292,25 @@ namespace BlueprintIT.Replicate
 			}
 		}
 
-		private void txtLocal_TextChanged(object sender, System.EventArgs e)
-		{
-			changed=true;
-		}
-
-		private void txtRemote_TextChanged(object sender, System.EventArgs e)
-		{
-			changed=true;
-		}
-
-		private void SyncOptions_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (changed)
-			{
-				DialogResult result = MessageBox.Show("Do you want to save these settings?","Save Settings?",MessageBoxButtons.YesNoCancel,MessageBoxIcon.Question);
-				if (result==DialogResult.Cancel)
-				{
-					e.Cancel=true;
-					return;
-				}
-				if (result==DialogResult.Yes)
-				{
-					if (settings.Name==null)
-					{
-						settings.Name=Question.Ask("Settings Name","Enter a name for these settings:");
-					}
-					if (settings.Name!=null)
-					{
-						settings.RemoteUri = new Uri(txtRemote.Text);
-						settings.LocalUri = new Uri("file:///"+txtLocal.Text.Replace('\\','/'));
-						settings.Save();
-					}
-				}
-			}
-		}
-
 		private void btnSync_Click(object sender, System.EventArgs e)
 		{
-			IStore local = providers.OpenStore(new Uri("file:///"+txtLocal.Text.Replace('\\','/')));
-			IStore remote = providers.OpenStore(new Uri(txtRemote.Text));
-			SyncScan scanner = new SyncScan(local,remote);
+			//IStore local = providers.OpenStore(new Uri("file:///"+txtLocal.Text.Replace('\\','/')));
+			//IStore remote = providers.OpenStore(new Uri(txtRemote.Text));
+			//SyncScan scanner = new SyncScan(local,remote);
+		}
+
+		private void btnOk_Click(object sender, System.EventArgs e)
+		{
+			if (settings.Name==null)
+			{
+				settings.Name=Question.Ask("Settings Name","Enter a name for these settings:");
+			}
+			if (settings.Name!=null)
+			{
+				settings.RemoteUri = new Uri(txtRemote.Text);
+				settings.LocalUri = new Uri("file:///"+txtLocal.Text.Replace('\\','/'));
+				settings.Persist();
+			}
 		}
 	}
 }

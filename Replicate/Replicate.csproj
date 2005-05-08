@@ -20,7 +20,7 @@
                 PostBuildEvent = ""
                 RootNamespace = "BlueprintIT.Replicate"
                 RunPostBuildEvent = "OnBuildSuccess"
-                StartupObject = "BlueprintIT.Replicate.Synchronise"
+                StartupObject = "BlueprintIT.Replicate.Replicate"
             >
                 <Config
                     Name = "Debug"
@@ -144,6 +144,11 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "Replicate.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Synchronise.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -180,6 +185,36 @@
                 />
                 <File
                     RelPath = "SyncSettings.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "State\File.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "State\FileMapping.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "State\Folder.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "State\FolderMapping.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "State\State.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "State\StateMapping.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
